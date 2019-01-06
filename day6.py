@@ -17,6 +17,8 @@ by_y = sorted(input_list, key=itemgetter(1))
 
 x_range = [point[0] for point in by_x[0::len(by_x) - 1]]
 y_range = [point[1] for point in by_y[0::len(by_y) - 1]]
+x_range[1] += 1
+y_range[1] += 1
 
 
 # directions = [(x, y) for x in range(-1, 2) for y in range(-1, 2) if x or y]  # 8 directions
@@ -32,7 +34,7 @@ def perimeter(dist):
 
 locations = {loc: loc for loc in input_list}
 point_areas = {loc: 1 for loc in input_list}
-area_size = (x_range[1] + 1 - x_range[0]) * (y_range[1] + 1 - y_range[0])  # Total number of locations
+area_size = (x_range[1] - x_range[0]) * (y_range[1] - y_range[0])  # Total number of locations
 infinite_adjacent = set()
 edge = {}
 
@@ -50,7 +52,7 @@ while len(locations) < area_size:
     for point in input_list:
         for delta in deltas:
             check_loc = tuple(map(sum, zip(point, delta)))  # Add the delta to the point
-            if x_range[0] <= check_loc[0] <= x_range[1] and y_range[0] <= check_loc[1] <= y_range[1]:
+            if x_range[0] <= check_loc[0] < x_range[1] and y_range[0] <= check_loc[1] < y_range[1]:
                 if check_loc not in locations:
                     if check_loc in additions:
                         if additions[check_loc] in point_areas:
@@ -82,12 +84,12 @@ back_map = {
 
 
 def print_grid():
-    for y in range(y_range[0], y_range[1] + 1):
-        row = []
-        for x in range(x_range[0], x_range[1] + 1):
+    for y in range(*y_range):
+        row_chars = []
+        for x in range(*x_range):
             loc = x, y
             if loc not in locations:
-                row.append('?')
+                row_chars.append('?')
                 continue
             owner = locations[loc]
             del locations[loc]
@@ -95,9 +97,25 @@ def print_grid():
             if loc != owner:
                 letter = letter.lower()
 
-            row.append(letter)
-        print(''.join(row))
+            row_chars.append(letter)
+        print(''.join(row_chars))
 
 
 largest_point_area = max(point_areas, key=point_areas.get)
 print('largest point area', largest_point_area, point_areas[largest_point_area])
+
+limit = 10000
+within_limit = 0
+for row in range(*y_range):
+    for col in range(*x_range):
+        dist_sum = 0
+        for point in input_list:
+            dist_sum += abs(col - point[0])
+            dist_sum += abs(row - point[1])
+            if dist_sum >= limit:
+                break
+
+        if dist_sum < limit:
+            within_limit += 1
+
+print('area within {}: {}'.format(limit, within_limit))

@@ -27,10 +27,10 @@ index = 2
 while data:
     if current.missing:
         new_node = Node(*data[:2])
+        del data[:2]
         current.children.append(new_node)
         current.missing -= 1
 
-        del data[:2]
         stack.append(new_node)
         current = new_node
     else:

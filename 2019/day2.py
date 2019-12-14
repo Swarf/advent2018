@@ -1,4 +1,4 @@
-# day 2
+from processor import Processor
 
 with open('data/day2') as day2:
     codes_list = [int(x) for x in day2.read().split(',')]
@@ -37,14 +37,13 @@ def process(codes):
     return codes
 
 
+p = Processor(codes_list)
 for x in range(100):
     for y in range(100):
-        test_list = codes_list.copy()
-        test_list[1] = x
-        test_list[2] = y
-        process(test_list)
+        p.reset()
+        output = p.process(x, y)
         if x == 12 and y == 2:
-            print('Part 1:', test_list[0])
-        if test_list[0] == 19690720:
+            print('Part 1:', output[0])
+        if output[0] == 19690720:
             print('Part 2:', x * 100 + y)
             break

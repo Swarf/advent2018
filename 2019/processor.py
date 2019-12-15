@@ -36,8 +36,10 @@ class Processor:
 
         res = func(*params)
         index += 1
-        if isinstance(res, bool):
-            return index if res else -1
+        if res is False:
+            return -1
+        elif res is True:
+            return index
 
         self._int_codes[self._int_codes[index]] = res
         return index + 1

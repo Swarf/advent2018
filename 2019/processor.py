@@ -10,47 +10,67 @@ class Processor:
             2: lambda a, b: a * b,
             3: self.input,
             4: self.print,
+            5: lambda a, b: self.move(bool(a), b),
+            6: lambda a, b: self.move(not a, b),
+            7: lambda a, b: int(a < b),
+            8: lambda a, b: int(a == b),
             99: lambda: False,
         }
+        self.index = 0
 
         self._param_counts = {x: len(inspect.signature(self._op_codes[x]).parameters) for x in self._op_codes}
 
     def reset(self):
         self._int_codes = self._reset_val.copy()
+        self.index = 0
 
     def print(self, a):
         print(a)
         return True
 
     def input(self):
-        return int(input())
+        return int(input('number: '))
 
-    def _exec_op(self, index: int = 0) -> int:
-        op_code = self._int_codes[index]
+    def move(self, test, position):
+        if test:
+            self.index = position
+        return True
 
-        func = self._op_codes[op_code]
+    def _exec_op(self):
+        instruction_code = self._int_codes[self.index]
+        op_code = instruction_code % 100
+
+        try:
+            func = self._op_codes[op_code]
+        except KeyError:
+            print("ERROR! Bad op code: {}".format(op_code))
+            op_code = 99
+            func = self._op_codes[op_code]
+
         params = []
-        for _ in range(self._param_counts[op_code]):
-            index += 1
-            params.append(self._int_codes[self._int_codes[index]])
+        for i in range(self._param_counts[op_code]):
+            self.index += 1
+            param_mode = instruction_code // 10 ** (i + 2) % 10
+            int_code = self._int_codes[self.index]
+            params.append(int_code if param_mode else self._int_codes[int_code])
 
+        self.index += 1
         res = func(*params)
-        index += 1
         if res is False:
-            return -1
+            self.index = -1
+            return
         elif res is True:
-            return index
+            return
 
-        self._int_codes[self._int_codes[index]] = res
-        return index + 1
+        self._int_codes[self._int_codes[self.index]] = res
+        self.index += 1
 
     def process(self, *overrides):
         for index, val in enumerate(overrides):
             self._int_codes[index + 1] = val
 
-        index = 0
-        while index >= 0:
-            index = self._exec_op(index)
+        while self.index >= 0:
+            self._exec_op()
         return self._int_codes
 
 

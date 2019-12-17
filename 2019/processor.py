@@ -9,7 +9,7 @@ class Processor:
             1: lambda a, b: a + b,
             2: lambda a, b: a * b,
             3: self.input,
-            4: self.print,
+            4: self.output,
             5: lambda a, b: self.move(bool(a), b),
             6: lambda a, b: self.move(not a, b),
             7: lambda a, b: int(a < b),
@@ -17,7 +17,8 @@ class Processor:
             99: lambda: False,
         }
         self.index = 0
-
+        self._input_queue = []
+        self._output_buffer = []
         self._param_counts = {x: len(inspect.signature(self._op_codes[x]).parameters) for x in self._op_codes}
 
     def reset(self, *overrides):
@@ -25,13 +26,14 @@ class Processor:
         self.index = 0
         for index, val in enumerate(overrides):
             self._int_codes[index + 1] = val
+        self._input_queue.clear()
 
-    def print(self, a):
-        print(a)
+    def output(self, a):
+        self._output_buffer.append(a)
         return True
 
     def input(self):
-        return int(input('number: '))
+        return self._input_queue.pop() if self._input_queue else int(input('number: '))
 
     def move(self, test, position):
         if test:
@@ -67,14 +69,22 @@ class Processor:
         self._int_codes[self._int_codes[self.index]] = res
         self.index += 1
 
-    def process(self):
-
+    def process(self, *inputs):
+        self._input_queue.extend(inputs)
         while self.index >= 0:
             self._exec_op()
         return self._int_codes
 
+    def queue_input(self):
+        self._input_queue.append(self._input_queue.pop(0))
+
+    def print(self):
+        for output in self._output_buffer:
+            print(output)
+        self._output_buffer.clear()
+
 
 if __name__ == '__main__':
     p = Processor([1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50])
-    output = p.process()
-    print(output)
+    result = p.process()
+    print(result)

@@ -20,9 +20,11 @@ class Processor:
 
         self._param_counts = {x: len(inspect.signature(self._op_codes[x]).parameters) for x in self._op_codes}
 
-    def reset(self):
+    def reset(self, *overrides):
         self._int_codes = self._reset_val.copy()
         self.index = 0
+        for index, val in enumerate(overrides):
+            self._int_codes[index + 1] = val
 
     def print(self, a):
         print(a)
@@ -65,9 +67,7 @@ class Processor:
         self._int_codes[self._int_codes[self.index]] = res
         self.index += 1
 
-    def process(self, *overrides):
-        for index, val in enumerate(overrides):
-            self._int_codes[index + 1] = val
+    def process(self):
 
         while self.index >= 0:
             self._exec_op()

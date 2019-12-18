@@ -23,7 +23,6 @@ class Processor:
 
     def reset(self, *overrides):
         self._int_codes = self._reset_val.copy()
-        self.index = 0
         for index, val in enumerate(overrides):
             self._int_codes[index + 1] = val
         self._input_queue.clear()
@@ -33,7 +32,7 @@ class Processor:
         return True
 
     def input(self):
-        return self._input_queue.pop() if self._input_queue else int(input('number: '))
+        return self._input_queue.pop(0) if self._input_queue else int(input('number: '))
 
     def move(self, test, position):
         if test:
@@ -70,6 +69,7 @@ class Processor:
         self.index += 1
 
     def process(self, *inputs):
+        self.index = 0
         self._input_queue.extend(inputs)
         while self.index >= 0:
             self._exec_op()

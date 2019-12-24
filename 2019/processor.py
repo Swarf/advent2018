@@ -75,8 +75,8 @@ class Processor:
             self._exec_op()
         return self._int_codes
 
-    def queue_input(self):
-        self._input_queue.append(self._input_queue.pop(0))
+    def pop(self):
+        return self._output_buffer.pop(0)
 
     def print(self):
         for output in self._output_buffer:

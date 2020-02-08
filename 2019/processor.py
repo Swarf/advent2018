@@ -1,4 +1,11 @@
 import inspect
+from enum import Enum
+
+
+class MachineState(Enum):
+    CONTINUE = 0
+    DONE = 1
+    WAITING = 2
 
 
 class Processor:
@@ -14,7 +21,7 @@ class Processor:
             6: lambda a, b: self.move(not a, b),
             7: lambda a, b: int(a < b),
             8: lambda a, b: int(a == b),
-            99: lambda: False,
+            99: lambda: MachineState.DONE,
         }
         self.index = 0
         self._input_queue = []
@@ -29,7 +36,7 @@ class Processor:
 
     def output(self, a):
         self._output_buffer.append(a)
-        return True
+        return MachineState.CONTINUE
 
     def input(self):
         return self._input_queue.pop(0) if self._input_queue else int(input('number: '))
@@ -37,7 +44,7 @@ class Processor:
     def move(self, test, position):
         if test:
             self.index = position
-        return True
+        return MachineState.CONTINUE
 
     def _exec_op(self):
         instruction_code = self._int_codes[self.index]
@@ -59,10 +66,10 @@ class Processor:
 
         self.index += 1
         res = func(*params)
-        if res is False:
+        if res is MachineState.DONE:
             self.index = -1
             return
-        elif res is True:
+        elif res is MachineState.CONTINUE:
             return
 
         self._int_codes[self._int_codes[self.index]] = res
